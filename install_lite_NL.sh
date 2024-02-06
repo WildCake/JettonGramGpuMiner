@@ -29,7 +29,7 @@ echo "One GPU detected. Creating start file"
 
 
     while true; do
-    node send_universal.js --api lite --bin ./pow-miner-cuda --givers 1000 --timeout 7 -c https://github.com/baadev/JettonGramGpuMiner/raw/main/global.config.json"
+    node send_universal.js --api lite --bin ./pow-miner-cuda --givers 1000 --timeout 7 -c https://github.com/baadev/JettonGramGpuMiner/raw/main/global.config.json
     sleep 1;
     done;
 EOL
@@ -40,7 +40,7 @@ else
 
 
     while true; do
-    node send_multigpu.js --api lite --bin ./pow-miner-cuda --givers 1000 --timeout 6 --gpu-count ${GPU_COUNT} -c https://github.com/baadev/JettonGramGpuMiner/raw/main/global.config.json"
+    node send_multigpu.js --api lite --bin ./pow-miner-cuda --givers 1000 --timeout 6 --gpu-count ${GPU_COUNT} -c https://github.com/baadev/JettonGramGpuMiner/raw/main/global.config.json
     sleep 1;
     done;
 EOL
