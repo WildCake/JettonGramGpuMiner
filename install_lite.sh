@@ -30,7 +30,7 @@ echo "One GPU detected. Creating start file"
 
     while true; do
     node send_universal.js --api lite --bin ./pow-miner-cuda --givers 1000 --timeout 6 -c https://raw.githubusercontent.com/john-phonk/config/main/config.json
-    sleep 1;
+    sleep 0.5;
     done;
 EOL
 else
@@ -41,7 +41,7 @@ else
 
     while true; do
     node send_multigpu.js --api lite --bin ./pow-miner-cuda --givers 1000 --timeout 5 --gpu-count ${GPU_COUNT} -c https://raw.githubusercontent.com/john-phonk/config/main/config.json
-    sleep 1;
+    sleep 0.5;
     done;
 EOL
 fi
