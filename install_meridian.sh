@@ -29,7 +29,7 @@ echo "One GPU detected. Creating start file"
 
 
     while true; do
-    node send_meridian.js --api lite --bin ./pow-miner-cuda --givers 10000
+    node send_meridian.js --api lite --bin ./pow-miner-cuda --givers 10000 -c https://raw.githubusercontent.com/john-phonk/config/main/config.json
     sleep 0.5;
     done;
 EOL
@@ -40,7 +40,7 @@ else
 
 
     while true; do
-    node send_multigpu.js --api lite --bin ./pow-miner-cuda --givers 10000 --gpu-count ${GPU_COUNT}
+    node send_multigpu.js --api lite --bin ./pow-miner-cuda --givers 10000 --gpu-count ${GPU_COUNT} -c https://raw.githubusercontent.com/john-phonk/config/main/config.json
     sleep 0.5;
     done;
 EOL
