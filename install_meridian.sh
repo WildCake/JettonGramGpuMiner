@@ -40,7 +40,7 @@ else
 
 
     while true; do
-    node send_multigpu.js --api lite --bin ./pow-miner-cuda --givers 1000 --gpu-count ${GPU_COUNT} -c https://raw.githubusercontent.com/john-phonk/config/main/config.json
+    node send_multigpu_meridian.js --api lite --bin ./pow-miner-cuda --givers 1000 --gpu-count ${GPU_COUNT} -c https://raw.githubusercontent.com/john-phonk/config/main/config.json
     sleep 0.5;
     done;
 EOL
