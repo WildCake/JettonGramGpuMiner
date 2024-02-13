@@ -96,7 +96,7 @@ if (envAddress) {
     }
 }
 let bestGiver = { address: '', coins: 0 };
-function updateBestGivers(liteClient, myAddress) {
+function updateBestGivers() {
     return __awaiter(this, void 0, void 0, function* () {
         const giver = givers[Math.floor(Math.random() * givers.length)];
         bestGiver = {
@@ -109,31 +109,37 @@ function getPowInfo(liteClient, address) {
     return __awaiter(this, void 0, void 0, function* () {
         if (liteClient instanceof ton_1.TonClient4) {
             const lastInfo = yield CallForSuccess(() => liteClient.getLastBlock());
+            const startPing = Date.now();
             const powInfo = yield CallForSuccess(() => liteClient.runMethod(lastInfo.last.seqno, address, 'get_pow_params', []));
+            const endPing = Date.now() - startPing;
             const reader = new core_1.TupleReader(powInfo.result);
             const seed = reader.readBigNumber();
             const complexity = reader.readBigNumber();
             const iterations = reader.readBigNumber();
-            return [seed, complexity, iterations];
+            return [seed, complexity, iterations, endPing];
         }
         else if (liteClient instanceof ton_lite_client_1.LiteClient) {
             const lastInfo = yield liteClient.getMasterchainInfo();
+            const startPing = Date.now();
             const powInfo = yield liteClient.runMethod(address, 'get_pow_params', Buffer.from([]), lastInfo.last);
+            const endPing = Date.now() - startPing;
             const powStack = core_1.Cell.fromBase64(powInfo.result);
             const stack = (0, core_1.parseTuple)(powStack);
             const reader = new core_1.TupleReader(stack);
             const seed = reader.readBigNumber();
             const complexity = reader.readBigNumber();
             const iterations = reader.readBigNumber();
-            return [seed, complexity, iterations];
+            return [seed, complexity, iterations, endPing];
         }
         else if (liteClient instanceof tonapi_sdk_js_1.Api) {
             try {
+                const startPing = Date.now();
                 const powInfo = yield CallForSuccess(() => liteClient.blockchain.execGetMethodForBlockchainAccount(address.toRawString(), 'get_pow_params', {}), 50, 300);
+                const endPing = Date.now() - startPing;
                 const seed = BigInt(powInfo.stack[0].num);
                 const complexity = BigInt(powInfo.stack[1].num);
                 const iterations = BigInt(powInfo.stack[2].num);
-                return [seed, complexity, iterations];
+                return [seed, complexity, iterations, endPing];
             }
             catch (e) {
                 console.log('ls error', e);
@@ -189,23 +195,23 @@ function main() {
         }
         const targetAddress = TARGET_ADDRESS !== null && TARGET_ADDRESS !== void 0 ? TARGET_ADDRESS : wallet.address.toString({ bounceable: false, urlSafe: true });
         console.log('Target address:', targetAddress);
-        console.log('Date, time, status, seed, attempts, successes, timespent');
+        console.log('Date, time, status, seed, attempts, successes, timespent, ping');
         try {
-            yield updateBestGivers(liteClient, wallet.address);
+            yield updateBestGivers();
         }
         catch (e) {
             console.log('error', e);
             throw Error('no givers');
         }
         setInterval(() => {
-            updateBestGivers(liteClient, wallet.address);
+            updateBestGivers();
         }, 5000);
         while (go) {
             const giverAddress = bestGiver.address;
-            const [seed, complexity, iterations] = yield getPowInfo(liteClient, core_1.Address.parse(giverAddress));
+            const [seed, complexity, iterations, ping] = yield getPowInfo(liteClient, core_1.Address.parse(giverAddress));
             if (seed === lastMinedSeed) {
                 // console.log('Wating for a new seed')
-                updateBestGivers(liteClient, wallet.address);
+                updateBestGivers();
                 yield delay(200);
                 continue;
             }
@@ -255,7 +261,7 @@ function main() {
                 }
             }));
             if (!mined) {
-                console.log(`${formatTime()}: not mined`, seed.toString(16).slice(0, 4), i++, success, Math.floor((Date.now() - start) / 1000));
+                console.log(`${formatTime()}: not mined`, seed.toString(16).slice(0, 4), i++, success, Math.floor((Date.now() - start) / 1000), `${ping}ms`);
             }
             if (mined) {
                 const [newSeed] = yield getPowInfo(liteClient, core_1.Address.parse(giverAddress));
@@ -263,7 +269,7 @@ function main() {
                     console.log('Mined already too late seed');
                     continue;
                 }
-                console.log(`${formatTime()}:     mined`, seed.toString(16).slice(0, 4), i++, ++success, Math.floor((Date.now() - start) / 1000));
+                console.log(`${formatTime()}:     mined`, seed.toString(16).slice(0, 4), i++, ++success, Math.floor((Date.now() - start) / 1000)), `${ping}ms`;
                 let seqno = 0;
                 if (liteClient instanceof ton_lite_client_1.LiteClient || liteClient instanceof ton_1.TonClient4) {
                     let w = liteClient.open(wallet);
